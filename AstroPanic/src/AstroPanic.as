@@ -8,7 +8,7 @@ package
 
 	public class AstroPanic extends Sprite
 	{
-		private const BULLET_SPEED:uint = 10;		// кол-во пикселей, которые пуля будет летeть на каждом кадре
+		private const BULLET_SPEED:uint = 20;		// кол-во пикселей, которые пуля будет летeть на каждом кадре
 		
 		private var baseWidth:Number = 800;
 		private var baseHeight:Number = 600;
@@ -20,12 +20,15 @@ package
 		private var fieldSprite: Sprite;			// слой для игрового поля
 		private var interfaceSprite: Sprite;		// слой для интерфейса
 		private var spaceshipSprite: Sprite;		// спрайт spaceship
+		private var enemySprite: Sprite;			// спрайт enemy
 		
 		private var background:Background;
 		private var spaceship:Spaceship;
 		private var bullet:Bullet;
+		private var enemy:Enemy;
 		
 		private var isFiring:Boolean = false;		// стреляет ли корабль
+		private var level:uint = 1;					//текущий уровень, начинается с 1
 		
 		public function AstroPanic() 
 		{
@@ -47,11 +50,14 @@ package
 			//spaceshipSprite.addChild(bullet);
 			placeSpaceship();
 			placeBullet();
+			
+			for (var i:uint=1; i<level+3; i++) {
+				placeEnemy(i);
+			}
+			
 			spaceshipSprite.addEventListener(Event.ENTER_FRAME, onEnterFrm);
 			addEventListener(MouseEvent.CLICK, onMouseClick);
 		}
-		
-
 		
 		private function placeSpaceship():void		// начальное размещение корабля
 		{
@@ -66,6 +72,16 @@ package
 			bullet.y = 0;
 			spaceshipSprite.addChild(bullet);
 		}
+		
+		private function placeEnemy(i:uint):void
+		{
+			enemy = new Enemy();
+			enemy.x  =Math.random() * 500 + 70;
+			enemy.y = Math.random() * 200 + 50;
+			//var glow:GlowFilter = new GlowFilter(0xFF00FF,1,6,6,2,2);
+			//enemy.filters=new Array(glow);
+			fieldSprite.addChild(enemy);
+		}	
 		
 		protected function onResize(event:Event):void
 		{
@@ -110,9 +126,10 @@ package
 			{
 				bullet.y -= BULLET_SPEED;
 				
-				if (bullet.y < -(HEIGHT - (spaceship.height))) 
+				if (bullet.y < 0) 
 				{
-					spaceshipSprite.removeChild(bullet);
+					fieldSprite.removeChild(bullet);
+					bullet = null;
 					isFiring = false;
 					placeBullet();
 				}
@@ -124,6 +141,9 @@ package
 			if (isFiring)	return;
 			{
 				isFiring = true;
+				fieldSprite.addChild(bullet);
+				bullet.x = spaceshipSprite.width / 2 + spaceshipSprite.x;
+				bullet.y = spaceshipSprite.y;
 			}
 		}
 		
